@@ -4,9 +4,10 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import './App.css';
 
-import Post from './Post';
-
 import { db, auth } from './firebase';
+
+import Post from './Post';
+import ImageUpload from './ImageUpload';
 
 function getModalStyle() {
   const top = 50;
@@ -57,14 +58,16 @@ function App() {
   }, [username]);
 
   useEffect(() => {
-    db.collection('posts').onSnapshot(snapshot =>
-      setPosts(
-        snapshot.docs.map(doc => ({
-          id: doc.id,
-          post: doc.data(),
-        }))
-      )
-    );
+    db.collection('posts')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot(snapshot =>
+        setPosts(
+          snapshot.docs.map(doc => ({
+            id: doc.id,
+            post: doc.data(),
+          }))
+        )
+      );
   }, []);
 
   const signUp = event => {
@@ -169,25 +172,32 @@ function App() {
           src='https://cdn.svgporn.com/logos/instagram.svg'
           alt=''
         />
+        {user ? (
+          <Button onClick={() => auth.signOut()}>Logout</Button>
+        ) : (
+          <div className='app__loginContainer'>
+            <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
+            <Button onClick={() => setOpen(true)}>Sign Up</Button>
+          </div>
+        )}
       </div>
 
-      {user ? (
-        <Button onClick={() => auth.signOut()}>Logout</Button>
-      ) : (
-        <div className='app__loginContainer'>
-          <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
-          <Button onClick={() => setOpen(true)}>Sign Up</Button>
-        </div>
-      )}
+      <div className='app__posts'>
+        {posts.map(({ id, post }) => (
+          <Post
+            username={post.username}
+            imageUrl={post.imageUrl}
+            caption={post.caption}
+            key={id}
+          />
+        ))}
+      </div>
 
-      {posts.map(({ id, post }) => (
-        <Post
-          username={post.username}
-          imageUrl={post.imageUrl}
-          caption={post.caption}
-          key={id}
-        />
-      ))}
+      {user?.displayName ? (
+        <ImageUpload username={user.displayName} />
+      ) : (
+        <h3>Sorry you need to login to upload</h3>
+      )}
     </div>
   );
 }
