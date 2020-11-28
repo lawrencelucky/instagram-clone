@@ -12,3 +12,8 @@
   object-fit: contain;
   height: 30px;
 }
+
+.app__signup {
+  display: flex;
+  flex-direction: column;
+}
