@@ -189,6 +189,8 @@ function App() {
             imageUrl={post.imageUrl}
             caption={post.caption}
             key={id}
+            postId={id}
+            user={user}
           />
         ))}
       </div>
